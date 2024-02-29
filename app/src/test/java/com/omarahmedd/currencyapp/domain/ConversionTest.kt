@@ -13,7 +13,7 @@ class ConversionTest {
 
     @Test
     fun testChangeSource() {
-        val initialState = ConversionState(null, EUR, 1.0, 0.0)
+        val initialState = ConversionState(null, EUR, "1.0", "0.0")
         val newState = Conversion.changeSource(USD, initialState)
 
         val expectedTarget = 1.0 * ExchangeRate.getRate(USD, EUR)
@@ -23,7 +23,7 @@ class ConversionTest {
 
     @Test
     fun testChangeTarget() {
-        val initialState = ConversionState(USD, EGP, 1.0, 0.0)
+        val initialState = ConversionState(USD, EGP, "1.0", "0.0")
         val newState = Conversion.changeTarget(EUR, initialState)
 
         val expectedTarget = 1.0 * ExchangeRate.getRate(USD, EUR)
@@ -33,8 +33,8 @@ class ConversionTest {
 
     @Test
     fun testChangeSourceAmount() {
-        val initialState = ConversionState(USD, EUR, 1.0, 0.0)
-        val newState = Conversion.changeSourceAmount(2.0, initialState)
+        val initialState = ConversionState(USD, EUR, "1.0", "0.0")
+        val newState = Conversion.changeSourceAmount("2.0", initialState)
 
         val expectedTarget = 2.0 * ExchangeRate.getRate(USD, EUR)
         assertEquals(newState.sourceAmount, 2.0, 0.000001)
@@ -43,8 +43,8 @@ class ConversionTest {
 
     @Test
     fun testChangeTargetAmount() {
-        val initialState = ConversionState(USD, EUR, 1.0, 0.0)
-        val newState = Conversion.changeTargetAmount(2.0, initialState)
+        val initialState = ConversionState(USD, EUR, "1.0", "0.0")
+        val newState = Conversion.changeTargetAmount("2.0", initialState)
 
         val expectedSource = 2.0 / ExchangeRate.getRate(USD, EUR)
         assertEquals(newState.targetAmount, 2.0, 0.000001)
@@ -53,7 +53,7 @@ class ConversionTest {
 
     @Test
     fun testSwapCurrencies() {
-        val initialState = ConversionState(USD, EUR, 1.0, 0.0)
+        val initialState = ConversionState(USD, EUR, "1.0", "0.0")
         val newState = Conversion.swapCurrencies(initialState)
 
         val expectedTarget = 1.0 * ExchangeRate.getRate(EUR, USD)

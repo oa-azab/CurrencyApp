@@ -1,6 +1,5 @@
 package com.omarahmedd.currencyapp.ui.conversion
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.omarahmedd.currencyapp.domain.Conversion
 import com.omarahmedd.currencyapp.domain.ConversionState
@@ -27,14 +26,12 @@ class ConversionViewModel @Inject constructor() : ViewModel() {
     }
 
     fun changeSourceAmount(amountStr: String) {
-        val value = stringToDouble(amountStr) ?: return
-        val newState = Conversion.changeSourceAmount(value, state.value)
+        val newState = Conversion.changeSourceAmount(amountStr, state.value)
         _state.value = newState
     }
 
     fun changeTargetAmount(amountStr: String) {
-        val value = stringToDouble(amountStr) ?: return
-        val newState = Conversion.changeTargetAmount(value, state.value)
+        val newState = Conversion.changeTargetAmount(amountStr, state.value)
         _state.value = newState
     }
 
@@ -43,12 +40,4 @@ class ConversionViewModel @Inject constructor() : ViewModel() {
         _state.value = newState
     }
 
-    private fun stringToDouble(str: String): Double? {
-        return try {
-            str.toDouble()
-        } catch (e: NumberFormatException) {
-            Log.w("ConversionViewModel", e)
-            null
-        }
-    }
 }

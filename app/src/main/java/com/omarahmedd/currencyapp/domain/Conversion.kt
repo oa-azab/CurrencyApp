@@ -1,5 +1,7 @@
 package com.omarahmedd.currencyapp.domain
 
+import android.util.Log
+
 
 fun main() {
     val USD = Currency("USD", "US Dollar")
@@ -14,10 +16,10 @@ fun main() {
     val t1 = Conversion.changeTarget(EUR, t0)
     println(t1.displayTransactionResult())
 
-    val t2 = Conversion.changeSourceAmount(15.0, t1)
+    val t2 = Conversion.changeSourceAmount("15.", t1)
     println(t2.displayTransactionResult())
 
-    val t3 = Conversion.changeTargetAmount(50.0, t2)
+    val t3 = Conversion.changeTargetAmount("50.0", t2)
     println(t3.displayTransactionResult())
 
     val t4 = Conversion.swapCurrencies(t3)
@@ -64,8 +66,8 @@ object ExchangeRate {
 data class ConversionState(
     val source: Currency? = null,
     val target: Currency? = null,
-    val sourceAmount: Double = 1.0,
-    val targetAmount: Double = 0.0,
+    val sourceAmount: String = "1.0",
+    val targetAmount: String = " ",
 ) {
     fun displayTransactionResult(): String {
         return "$sourceAmount ${source?.symbol} is equal to $targetAmount ${target?.symbol}"
@@ -77,7 +79,7 @@ object Conversion {
 
     fun changeSource(newSource: Currency, state: ConversionState): ConversionState {
         val rate = ExchangeRate.getRate(newSource, state.target)
-        val newTargetAmount = state.sourceAmount * rate
+        val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             source = newSource,
             targetAmount = newTargetAmount
@@ -86,25 +88,25 @@ object Conversion {
 
     fun changeTarget(newTarget: Currency, state: ConversionState): ConversionState {
         val rate = ExchangeRate.getRate(state.source, newTarget)
-        val newTargetAmount = state.sourceAmount * rate
+        val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             target = newTarget,
             targetAmount = newTargetAmount
         )
     }
 
-    fun changeSourceAmount(newSourceAmount: Double, state: ConversionState): ConversionState {
+    fun changeSourceAmount(newSourceAmount: String, state: ConversionState): ConversionState {
         val rate = ExchangeRate.getRate(state.source, state.target)
-        val newTargetAmount = newSourceAmount * rate
+        val newTargetAmount = convert(newSourceAmount, rate)
         return state.copy(
             sourceAmount = newSourceAmount,
             targetAmount = newTargetAmount
         )
     }
 
-    fun changeTargetAmount(newTargetAmount: Double, state: ConversionState): ConversionState {
+    fun changeTargetAmount(newTargetAmount: String, state: ConversionState): ConversionState {
         val rate = ExchangeRate.getRate(state.source, state.target)
-        val newSourceAmount = newTargetAmount / rate
+        val newSourceAmount = convert(newTargetAmount, 1 / rate)
         return state.copy(
             sourceAmount = newSourceAmount,
             targetAmount = newTargetAmount
@@ -115,11 +117,21 @@ object Conversion {
         val newSource = state.target
         val newTarget = state.source
         val rate = ExchangeRate.getRate(newSource, newTarget)
-        val newTargetAmount = state.sourceAmount * rate
+        val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             source = newSource,
             target = newTarget,
             targetAmount = newTargetAmount
         )
+    }
+
+    private fun convert(numberAsString: String, exchangeRate: Double): String {
+        return try {
+            val target = numberAsString.toDouble() * exchangeRate
+            String.format("%.2f", target)
+        } catch (t: Throwable) {
+            Log.w("Conversion", t)
+            " "
+        }
     }
 }
