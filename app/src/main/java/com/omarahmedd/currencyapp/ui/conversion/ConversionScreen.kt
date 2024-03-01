@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omarahmedd.currencyapp.R
 import com.omarahmedd.currencyapp.domain.ConversionState
-import com.omarahmedd.currencyapp.domain.Currency
+import com.omarahmedd.currencyapp.model.Currency
 import com.omarahmedd.currencyapp.ui.theme.CurrencyAppTheme
 
 @Composable
@@ -42,23 +44,25 @@ fun ConversionRoute(
     viewModel: ConversionViewModel = hiltViewModel()
 ) {
     ConversionScreen(
-        conversionState = viewModel.state.collectAsStateWithLifecycle(),
+        uiState = viewModel.state.collectAsStateWithLifecycle(),
         onSourceCurrencyChange = { viewModel.changeSourceCurrency(it) },
         onTargetCurrencyChange = { viewModel.changeTargetCurrency(it) },
         onSourceAmountChange = { viewModel.changeSourceAmount(it) },
         onTargetAmountChange = { viewModel.changeTargetAmount(it) },
-        onSwapCurrency = { viewModel.swapCurrency() }
+        onSwapCurrency = { viewModel.swapCurrency() },
+        onRetryClicked = { viewModel.getCurrencies() }
     )
 }
 
 @Composable
 fun ConversionScreen(
-    conversionState: State<ConversionState>,
+    uiState: State<ConversionUiState>,
     onSourceCurrencyChange: (Currency) -> Unit,
     onTargetCurrencyChange: (Currency) -> Unit,
     onSourceAmountChange: (String) -> Unit,
     onTargetAmountChange: (String) -> Unit,
-    onSwapCurrency: () -> Unit
+    onSwapCurrency: () -> Unit,
+    onRetryClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -68,52 +72,75 @@ fun ConversionScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Row {
+        when (val state = uiState.value) {
+            is SuccessUiState -> {
+                Row {
 
-            CurrencyDropDownMenu(
-                modifier = Modifier.weight(1f),
-                text = conversionState.value.source?.toString() ?: "From",
-                onCurrencyChange = onSourceCurrencyChange
-            )
+                    CurrencyDropDownMenu(
+                        modifier = Modifier.weight(1f),
+                        currencies = state.currencies,
+                        text = state.conversionState.source?.toString() ?: "From",
+                        onCurrencyChange = onSourceCurrencyChange
+                    )
 
-            Button(onClick = onSwapCurrency) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_swap_horiz_24),
-                    contentDescription = "Swap"
-                )
+                    Button(onClick = onSwapCurrency) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_swap_horiz_24),
+                            contentDescription = "Swap"
+                        )
+                    }
+
+                    CurrencyDropDownMenu(
+                        modifier = Modifier.weight(1f),
+                        currencies = state.currencies,
+                        text = state.conversionState.target?.toString() ?: "To",
+                        onCurrencyChange = onTargetCurrencyChange
+                    )
+                }
+
+                Row {
+
+                    OutlinedTextField(
+                        value = state.conversionState.sourceAmount,
+                        onValueChange = { onSourceAmountChange(it) },
+                        label = { Text("Source Amount") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Spacer(modifier = Modifier.width(48.dp))
+
+                    OutlinedTextField(
+                        value = state.conversionState.targetAmount,
+                        onValueChange = { onTargetAmountChange(it) },
+                        label = { Text("Target Amount") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                }
             }
 
-            CurrencyDropDownMenu(
-                modifier = Modifier.weight(1f),
-                text = conversionState.value.target?.toString() ?: "To",
-                onCurrencyChange = onTargetCurrencyChange
-            )
-        }
+            is LoadingUiState -> {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Loading ... "
+                )
 
-        Row {
+                LinearProgressIndicator()
+            }
 
-            OutlinedTextField(
-                value = conversionState.value.sourceAmount.toString(),
-                onValueChange = { onSourceAmountChange(it) },
-                label = { Text("Source Amount") },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(48.dp))
-
-            OutlinedTextField(
-                value = conversionState.value.targetAmount.toString(),
-                onValueChange = { onTargetAmountChange(it) },
-                label = { Text("Target Amount") },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                modifier = Modifier.weight(1f)
-            )
-
+            is ErrorUiState -> {
+                Text(text = state.errorMessage)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetryClicked) {
+                    Text(text = "Retry")
+                }
+            }
         }
 
     }
@@ -122,6 +149,7 @@ fun ConversionScreen(
 @Composable
 private fun CurrencyDropDownMenu(
     modifier: Modifier = Modifier,
+    currencies: List<Currency>,
     text: String,
     onCurrencyChange: (Currency) -> Unit
 ) {
@@ -137,7 +165,7 @@ private fun CurrencyDropDownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false })
         {
-            for (currency in Currency.getCurrencies()) {
+            for (currency in currencies) {
                 DropdownMenuItem(
                     text = { Text(text = currency.toString()) },
                     onClick = {
@@ -160,7 +188,8 @@ fun ConversionScreenPreview() {
         val EUR = Currency("EUR", "Euro")
 
         ConversionScreen(
-            mutableStateOf(ConversionState(USD, EUR)),
+            mutableStateOf(SuccessUiState(listOf(USD, EUR), ConversionState(USD, EUR))),
+            {},
             {},
             {},
             {},

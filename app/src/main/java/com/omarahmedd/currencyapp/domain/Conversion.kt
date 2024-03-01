@@ -1,6 +1,7 @@
 package com.omarahmedd.currencyapp.domain
 
 import android.util.Log
+import com.omarahmedd.currencyapp.model.Currency
 
 
 fun main() {
@@ -24,26 +25,6 @@ fun main() {
 
     val t4 = Conversion.swapCurrencies(t3)
     println(t4.displayTransactionResult())
-}
-
-data class Currency(
-    val symbol: String,
-    val name: String
-) {
-
-    override fun toString(): String {
-        return "$symbol - $name"
-    }
-
-    companion object {
-        fun getCurrencies(): List<Currency> {
-            return listOf(
-                Currency("USD", "US Dollar"),
-                Currency("EUR", "Euro"),
-                Currency("EGP", "Egyptian Pound"),
-            )
-        }
-    }
 }
 
 
