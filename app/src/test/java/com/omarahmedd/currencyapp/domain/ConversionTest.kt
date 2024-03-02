@@ -1,5 +1,6 @@
 package com.omarahmedd.currencyapp.domain
 
+import com.omarahmedd.currencyapp.FakeExchangeRateRepository
 import com.omarahmedd.currencyapp.model.ConversionState
 import com.omarahmedd.currencyapp.model.Currency
 import org.junit.Assert.assertEquals
@@ -13,55 +14,58 @@ class ConversionTest {
         val EGP = Currency("EGP", "Egyptian Pound")
     }
 
+    private val exchangeRepo = FakeExchangeRateRepository()
+    private val conversion = Conversion(exchangeRepo)
+
     @Test
     fun testChangeSource() {
         val initialState = ConversionState(null, EUR, "1.0", "0.0")
-        val newState = Conversion.changeSource(USD, initialState)
+        val newState = conversion.changeSource(USD, initialState)
 
-        val expectedTarget = 1.0 * ExchangeRate.getRate(USD, EUR)
+        val expectedTarget = 1.0 * exchangeRepo.getExchangeRate(USD, EUR)
         assertEquals(newState.source, USD)
-        assertEquals(newState.targetAmount, expectedTarget, 0.000001)
+        assertEquals(newState.targetAmount, String.format("%.2f", expectedTarget))
     }
 
     @Test
     fun testChangeTarget() {
         val initialState = ConversionState(USD, EGP, "1.0", "0.0")
-        val newState = Conversion.changeTarget(EUR, initialState)
+        val newState = conversion.changeTarget(EUR, initialState)
 
-        val expectedTarget = 1.0 * ExchangeRate.getRate(USD, EUR)
+        val expectedTarget = 1.0 * exchangeRepo.getExchangeRate(USD, EUR)
         assertEquals(newState.target, EUR)
-        assertEquals(newState.targetAmount, expectedTarget, 0.000001)
+        assertEquals(newState.targetAmount, String.format("%.2f", expectedTarget))
     }
 
     @Test
     fun testChangeSourceAmount() {
         val initialState = ConversionState(USD, EUR, "1.0", "0.0")
-        val newState = Conversion.changeSourceAmount("2.0", initialState)
+        val newState = conversion.changeSourceAmount("2.0", initialState)
 
-        val expectedTarget = 2.0 * ExchangeRate.getRate(USD, EUR)
-        assertEquals(newState.sourceAmount, 2.0, 0.000001)
-        assertEquals(newState.targetAmount, expectedTarget, 0.000001)
+        val expectedTarget = 2.0 * exchangeRepo.getExchangeRate(USD, EUR)
+        assertEquals(newState.sourceAmount, "2.0")
+        assertEquals(newState.targetAmount, String.format("%.2f", expectedTarget))
     }
 
     @Test
     fun testChangeTargetAmount() {
         val initialState = ConversionState(USD, EUR, "1.0", "0.0")
-        val newState = Conversion.changeTargetAmount("2.0", initialState)
+        val newState = conversion.changeTargetAmount("2.0", initialState)
 
-        val expectedSource = 2.0 / ExchangeRate.getRate(USD, EUR)
-        assertEquals(newState.targetAmount, 2.0, 0.000001)
-        assertEquals(newState.sourceAmount, expectedSource, 0.000001)
+        val expectedSource = 2.0 / exchangeRepo.getExchangeRate(USD, EUR)
+        assertEquals(newState.targetAmount, "2.0")
+        assertEquals(newState.sourceAmount, String.format("%.2f", expectedSource))
     }
 
     @Test
     fun testSwapCurrencies() {
         val initialState = ConversionState(USD, EUR, "1.0", "0.0")
-        val newState = Conversion.swapCurrencies(initialState)
+        val newState = conversion.swapCurrencies(initialState)
 
-        val expectedTarget = 1.0 * ExchangeRate.getRate(EUR, USD)
+        val expectedTarget = 1.0 * exchangeRepo.getExchangeRate(EUR, USD)
         assertEquals(newState.source, EUR)
         assertEquals(newState.target, USD)
-        assertEquals(newState.targetAmount, expectedTarget, 0.000001)
+        assertEquals(newState.targetAmount, String.format("%.2f", expectedTarget))
     }
 
 }
