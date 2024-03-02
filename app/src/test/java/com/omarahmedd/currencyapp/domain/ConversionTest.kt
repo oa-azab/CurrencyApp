@@ -1,5 +1,7 @@
 package com.omarahmedd.currencyapp.domain
 
+import com.omarahmedd.currencyapp.model.ConversionState
+import com.omarahmedd.currencyapp.model.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

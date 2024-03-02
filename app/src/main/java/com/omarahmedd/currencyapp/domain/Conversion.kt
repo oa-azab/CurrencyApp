@@ -1,108 +1,69 @@
 package com.omarahmedd.currencyapp.domain
 
 import android.util.Log
+import com.omarahmedd.currencyapp.data.ExchangeRateRepository
+import com.omarahmedd.currencyapp.model.ConversionState
 import com.omarahmedd.currencyapp.model.Currency
+import javax.inject.Inject
 
 
-fun main() {
-    val USD = Currency("USD", "US Dollar")
-    val EUR = Currency("EUR", "Euro")
-
-    val initState = ConversionState()
-    println(initState.displayTransactionResult())
-
-    val t0 = Conversion.changeSource(USD, initState)
-    println(t0.displayTransactionResult())
-
-    val t1 = Conversion.changeTarget(EUR, t0)
-    println(t1.displayTransactionResult())
-
-    val t2 = Conversion.changeSourceAmount("15.", t1)
-    println(t2.displayTransactionResult())
-
-    val t3 = Conversion.changeTargetAmount("50.0", t2)
-    println(t3.displayTransactionResult())
-
-    val t4 = Conversion.swapCurrencies(t3)
-    println(t4.displayTransactionResult())
-}
-
-
-object ExchangeRate {
-
-    fun getRate(source: Currency?, target: Currency?): Double {
-        return when ("${source?.symbol}>${target?.symbol}") {
-            "USD>EUR" -> 0.922216
-            "EUR>USD" -> 1.0843452
-            "USD>EGP" -> 30.90377
-            "EGP>USD" -> 0.032358511
-            "EUR>EGP" -> 33.388701
-            "EGP>EUR" -> 0.029950252
-            else -> 0.0
-        }
-    }
-
-}
-
-data class ConversionState(
-    val source: Currency? = null,
-    val target: Currency? = null,
-    val sourceAmount: String = "1.0",
-    val targetAmount: String = " ",
+class Conversion @Inject constructor(
+    private val repository: ExchangeRateRepository
 ) {
-    fun displayTransactionResult(): String {
-        return "$sourceAmount ${source?.symbol} is equal to $targetAmount ${target?.symbol}"
-    }
-}
 
-
-object Conversion {
+    private val zeroExchangeRateMessage = "These currencies are not supported in free version\n" +
+            "Make sure that EUR is one conversion currencies"
 
     fun changeSource(newSource: Currency, state: ConversionState): ConversionState {
-        val rate = ExchangeRate.getRate(newSource, state.target)
+        val rate = repository.getExchangeRate(newSource, state.target)
         val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             source = newSource,
-            targetAmount = newTargetAmount
+            targetAmount = newTargetAmount,
+            message = getConversionMessage(rate)
         )
     }
 
     fun changeTarget(newTarget: Currency, state: ConversionState): ConversionState {
-        val rate = ExchangeRate.getRate(state.source, newTarget)
+        val rate = repository.getExchangeRate(state.source, newTarget)
         val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             target = newTarget,
-            targetAmount = newTargetAmount
+            targetAmount = newTargetAmount,
+            message = getConversionMessage(rate)
         )
     }
 
     fun changeSourceAmount(newSourceAmount: String, state: ConversionState): ConversionState {
-        val rate = ExchangeRate.getRate(state.source, state.target)
+        val rate = repository.getExchangeRate(state.source, state.target)
         val newTargetAmount = convert(newSourceAmount, rate)
         return state.copy(
             sourceAmount = newSourceAmount,
-            targetAmount = newTargetAmount
+            targetAmount = newTargetAmount,
+            message = getConversionMessage(rate)
         )
     }
 
     fun changeTargetAmount(newTargetAmount: String, state: ConversionState): ConversionState {
-        val rate = ExchangeRate.getRate(state.source, state.target)
+        val rate = repository.getExchangeRate(state.source, state.target)
         val newSourceAmount = convert(newTargetAmount, 1 / rate)
         return state.copy(
             sourceAmount = newSourceAmount,
-            targetAmount = newTargetAmount
+            targetAmount = newTargetAmount,
+            message = getConversionMessage(rate)
         )
     }
 
     fun swapCurrencies(state: ConversionState): ConversionState {
         val newSource = state.target
         val newTarget = state.source
-        val rate = ExchangeRate.getRate(newSource, newTarget)
+        val rate = repository.getExchangeRate(newSource, newTarget)
         val newTargetAmount = convert(state.sourceAmount, rate)
         return state.copy(
             source = newSource,
             target = newTarget,
-            targetAmount = newTargetAmount
+            targetAmount = newTargetAmount,
+            message = getConversionMessage(rate)
         )
     }
 
@@ -115,4 +76,7 @@ object Conversion {
             " "
         }
     }
+
+    private fun getConversionMessage(rate: Double) =
+        if (rate == 0.0) zeroExchangeRateMessage else ""
 }

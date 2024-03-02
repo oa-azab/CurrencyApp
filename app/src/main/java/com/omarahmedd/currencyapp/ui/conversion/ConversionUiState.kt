@@ -1,6 +1,6 @@
 package com.omarahmedd.currencyapp.ui.conversion
 
-import com.omarahmedd.currencyapp.domain.ConversionState
+import com.omarahmedd.currencyapp.model.ConversionState
 import com.omarahmedd.currencyapp.model.Currency
 
 
