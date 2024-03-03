@@ -1,6 +1,7 @@
-package com.omarahmedd.currencyapp.data
+package com.omarahmedd.currencyapp.data.impl
 
 import android.util.Log
+import com.omarahmedd.currencyapp.data.ExchangeRateRepository
 import com.omarahmedd.currencyapp.data.remote.ExchangeRateRemoteSource
 import com.omarahmedd.currencyapp.model.Currency
 import javax.inject.Inject

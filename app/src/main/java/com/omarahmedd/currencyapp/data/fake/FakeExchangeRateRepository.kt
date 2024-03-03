@@ -1,9 +1,13 @@
-package com.omarahmedd.currencyapp
+package com.omarahmedd.currencyapp.data.fake
 
 import com.omarahmedd.currencyapp.data.ExchangeRateRepository
 import com.omarahmedd.currencyapp.model.Currency
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.random.Random
 
-class FakeExchangeRateRepository : ExchangeRateRepository {
+@Singleton
+class FakeExchangeRateRepository @Inject constructor() : ExchangeRateRepository {
 
     override suspend fun getExchangeRates() {
 
@@ -23,7 +27,7 @@ class FakeExchangeRateRepository : ExchangeRateRepository {
     }
 
     override suspend fun getExchangeRateAt(day: String, targetSymbol: String): Double {
-        return 0.0
+        return Random.nextDouble(1.2, 1.7)
     }
 
 }

@@ -1,7 +1,9 @@
 package com.omarahmedd.currencyapp.di
 
+import com.omarahmedd.currencyapp.data.CurrencyRepository
 import com.omarahmedd.currencyapp.data.ExchangeRateRepository
-import com.omarahmedd.currencyapp.data.ExchangeRateRepositoryImpl
+import com.omarahmedd.currencyapp.data.fake.FakeCurrencyRepository
+import com.omarahmedd.currencyapp.data.fake.FakeExchangeRateRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,6 +14,9 @@ import dagger.hilt.components.SingletonComponent
 abstract class DiBinds {
 
     @Binds
-    abstract fun exchangeRates(impl: ExchangeRateRepositoryImpl): ExchangeRateRepository
+    abstract fun currency(impl: FakeCurrencyRepository): CurrencyRepository
+
+    @Binds
+    abstract fun exchangeRates(impl: FakeExchangeRateRepository): ExchangeRateRepository
 
 }

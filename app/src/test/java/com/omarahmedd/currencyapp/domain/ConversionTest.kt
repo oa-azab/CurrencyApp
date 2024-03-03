@@ -1,18 +1,14 @@
 package com.omarahmedd.currencyapp.domain
 
-import com.omarahmedd.currencyapp.FakeExchangeRateRepository
+import com.omarahmedd.currencyapp.data.fake.FakeCurrencyRepository.Companion.EGP
+import com.omarahmedd.currencyapp.data.fake.FakeCurrencyRepository.Companion.EUR
+import com.omarahmedd.currencyapp.data.fake.FakeCurrencyRepository.Companion.USD
+import com.omarahmedd.currencyapp.data.fake.FakeExchangeRateRepository
 import com.omarahmedd.currencyapp.model.ConversionState
-import com.omarahmedd.currencyapp.model.Currency
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ConversionTest {
-
-    companion object {
-        val USD = Currency("USD", "US Dollar")
-        val EUR = Currency("EUR", "Euro")
-        val EGP = Currency("EGP", "Egyptian Pound")
-    }
 
     private val exchangeRepo = FakeExchangeRateRepository()
     private val conversion = Conversion(exchangeRepo)
