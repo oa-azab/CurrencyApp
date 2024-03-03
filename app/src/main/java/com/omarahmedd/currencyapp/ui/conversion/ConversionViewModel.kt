@@ -31,7 +31,10 @@ class ConversionViewModel @Inject constructor(
             _state.value = LoadingUiState
             when (val result = setupConversionUseCase.invoke()) {
                 is UCResult.Success -> {
-                    _state.value = SuccessUiState(result.data, ConversionState())
+                    _state.value = SuccessUiState(
+                        result.data,
+                        ConversionState(message = "Select currencies to start")
+                    )
                 }
 
                 is UCResult.Error -> {

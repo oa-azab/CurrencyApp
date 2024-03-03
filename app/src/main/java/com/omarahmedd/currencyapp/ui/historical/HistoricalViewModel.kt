@@ -30,6 +30,7 @@ class HistoricalViewModel @Inject constructor(
 
     fun loadHistoricalData() {
         viewModelScope.launch {
+            _state.value = LoadingUiState
             val result = getHistoricalDataUseCase.invoke(currencies.orEmpty())
             when (result) {
                 is UCResult.Success -> {

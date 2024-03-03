@@ -1,7 +1,6 @@
 package com.omarahmedd.currencyapp.ui.historical
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +23,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omarahmedd.currencyapp.model.Currency
 import com.omarahmedd.currencyapp.model.HistoricalState
+import com.omarahmedd.currencyapp.ui.ErrorView
+import com.omarahmedd.currencyapp.ui.LoadingView
 import com.omarahmedd.currencyapp.ui.theme.CurrencyAppTheme
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
@@ -119,35 +118,14 @@ fun HistoricalScreen(
         }
 
         is LoadingUiState -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Loading ... "
-                )
-                LinearProgressIndicator()
-            }
+            LoadingView()
         }
 
         is ErrorUiState -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = state.errorMessage)
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onRetryClicked) {
-                    Text(text = "Retry")
-                }
-            }
+            ErrorView(
+                errorMessage = state.errorMessage,
+                onRetryClicked = onRetryClicked
+            )
         }
     }
 }
