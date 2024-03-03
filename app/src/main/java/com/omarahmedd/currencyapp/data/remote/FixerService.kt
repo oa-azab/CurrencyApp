@@ -4,6 +4,7 @@ import com.omarahmedd.currencyapp.data.remote.model.CurrencyResponse
 import com.omarahmedd.currencyapp.data.remote.model.ExchangeRateResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FixerService {
@@ -20,6 +21,13 @@ interface FixerService {
     @GET("latest")
     suspend fun getExchangeRates(
         @Query("access_key") apiKey: String = API_KEY
+    ): Response<ExchangeRateResponse>
+
+    @GET("{day}")
+    suspend fun getExchangeRateAt(
+        @Path("day") day: String,
+        @Query("access_key") apiKey: String = API_KEY,
+        @Query("symbols") target: String,
     ): Response<ExchangeRateResponse>
 
 }

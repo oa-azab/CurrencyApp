@@ -48,7 +48,8 @@ import com.omarahmedd.currencyapp.ui.theme.CurrencyAppTheme
 
 @Composable
 fun ConversionRoute(
-    viewModel: ConversionViewModel = hiltViewModel()
+    viewModel: ConversionViewModel = hiltViewModel(),
+    navToHistorical: (String) -> Unit
 ) {
     ConversionScreen(
         uiState = viewModel.state.collectAsStateWithLifecycle(),
@@ -57,7 +58,8 @@ fun ConversionRoute(
         onSourceAmountChange = { viewModel.changeSourceAmount(it) },
         onTargetAmountChange = { viewModel.changeTargetAmount(it) },
         onSwapCurrency = { viewModel.swapCurrency() },
-        onRetryClicked = { viewModel.getCurrencies() }
+        onRetryClicked = { viewModel.getCurrencies() },
+        onDetailsClicked = navToHistorical
     )
 }
 
@@ -69,7 +71,8 @@ fun ConversionScreen(
     onSourceAmountChange: (String) -> Unit,
     onTargetAmountChange: (String) -> Unit,
     onSwapCurrency: () -> Unit,
-    onRetryClicked: () -> Unit
+    onRetryClicked: () -> Unit,
+    onDetailsClicked: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -145,7 +148,12 @@ fun ConversionScreen(
                 )
 
                 Button(
-                    onClick = { },
+                    onClick = {
+                        val base = state.conversionState.source?.symbol
+                        val target = state.conversionState.target?.symbol
+                        val currencies = "$base-$target"
+                        onDetailsClicked(currencies)
+                    },
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(text = "Details")
@@ -268,6 +276,7 @@ fun ConversionScreenPreview() {
 
         ConversionScreen(
             mutableStateOf(SuccessUiState(listOf(USD, EUR), ConversionState(USD, EUR))),
+            {},
             {},
             {},
             {},

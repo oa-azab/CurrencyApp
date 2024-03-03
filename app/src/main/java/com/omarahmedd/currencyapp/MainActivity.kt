@@ -6,8 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.omarahmedd.currencyapp.ui.conversion.ConversionRoute
+import com.omarahmedd.currencyapp.ui.historical.HistoricalRoute
 import com.omarahmedd.currencyapp.ui.theme.CurrencyAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,9 +29,30 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ConversionRoute()
+                    AppNavHost()
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "conversion") {
+        composable("conversion") {
+            ConversionRoute(
+                navToHistorical = { currencies -> navController.navigate("historical/$currencies") }
+            )
+        }
+        composable(
+            "historical/{currencies}",
+            arguments = listOf(
+                navArgument("currencies") { type = NavType.StringType },
+            )
+        ) {
+            HistoricalRoute()
+        }
+
     }
 }

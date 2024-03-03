@@ -41,4 +41,21 @@ class ExchangeRateRemoteSource @Inject constructor(
         return map
     }
 
+    suspend fun getExchangeRateAt(day: String, targetSymbol: String): Double {
+        val response = service.getExchangeRateAt(day = day, target = targetSymbol)
+        val body = response.body()
+        if (!response.isSuccessful || body == null) {
+            throw Exception(
+                "response code = ${response.code()}, message = ${response.errorBody().toString()}"
+            )
+        }
+
+        if (body.rates == null) {
+            throw Exception("api error code = ${body.error?.code}, info = ${body.error?.info}")
+        }
+
+        val rate = body.rates.get(targetSymbol).asDouble
+        return rate
+    }
+
 }

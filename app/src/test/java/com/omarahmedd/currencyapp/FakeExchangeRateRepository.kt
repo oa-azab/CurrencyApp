@@ -22,4 +22,8 @@ class FakeExchangeRateRepository : ExchangeRateRepository {
         }
     }
 
+    override suspend fun getExchangeRateAt(day: String, targetSymbol: String): Double {
+        return 0.0
+    }
+
 }

@@ -32,4 +32,8 @@ class ExchangeRateRepositoryImpl @Inject constructor(
         return rate ?: 0.0
     }
 
+    override suspend fun getExchangeRateAt(day: String, targetSymbol: String): Double {
+        return remoteSource.getExchangeRateAt(day, targetSymbol)
+    }
+
 }
